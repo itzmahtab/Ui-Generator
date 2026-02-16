@@ -1,7 +1,8 @@
-import React from "react";
+import React, { useState } from "react";
 import { FaUser } from "react-icons/fa";
 import { HiSun } from "react-icons/hi";
 import { RiSettings3Fill } from "react-icons/ri";
+
 
 function Navbar() {
   return (

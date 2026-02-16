@@ -3,6 +3,8 @@ import Navbar from "../components/Navbar";
 import Select from "react-select"; // FIXED
 import { BsStars } from "react-icons/bs";
 import { HiOutlineCode } from "react-icons/hi";
+import Editor from '@monaco-editor/react';
+const [outputScreen, setOutputScreen] = useState(false)
 
 function Home() {
   const options = [
@@ -55,7 +57,7 @@ function Home() {
           <p className="text-gray-400 mt-2">
             Generate beautiful UI components with AI assistance
           </p>
-          <p className="text-15px font-semibold mt-3"> Choice your FrameWork</p>
+          <p className="text-15px font-semibold mt-3"> Choose your FrameWork</p>
           <Select
             className="mt-4"
             options={options}
