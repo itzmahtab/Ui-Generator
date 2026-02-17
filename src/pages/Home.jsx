@@ -65,7 +65,7 @@ function Home() {
             Generate beautiful UI components with AI assistance
           </p>
 
-          <p className="text-15px font-semibold mt-3">
+          <p className="text-[15px] font-semibold mt-3">
             Choice your FrameWork
           </p>
 
