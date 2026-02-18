@@ -74,6 +74,15 @@ And give the whole code in a single HTML file.`
       });
 
       const data = await res.json();
+
+      if (!res.ok) {
+        throw new Error(data.error?.message || `API Error: ${res.status}`);
+      }
+
+      if (!data.choices || data.choices.length === 0) {
+        throw new Error("No response from AI model.");
+      }
+
       const content = data.choices[0].message.content;
 
       // Extract code if wrapped in markdown blocks
@@ -85,7 +94,7 @@ And give the whole code in a single HTML file.`
       toast.success("Component generated successfully!");
     } catch (error) {
       console.error(error);
-      toast.error("Error generating component!");
+      toast.error(error.message || "Error generating component!");
     } finally {
       setLoading(false);
     }
