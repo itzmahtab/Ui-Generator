@@ -8,7 +8,7 @@ import { IoCopy } from "react-icons/io5";
 import { PiExportBold } from "react-icons/pi";
 import { ImNewTab } from "react-icons/im";
 import { FiRefreshCw } from "react-icons/fi";
-import { GoogleGenAI } from "@google/genai";
+
 import { ClipLoader } from "react-spinners";
 import { ToastContainer, toast } from "react-toastify";
 import 'react-toastify/dist/ReactToastify.css';
@@ -31,24 +31,30 @@ function Home() {
 
   const [framework, setFramework] = useState(options[0]);
 
-  // AI client
-  const ai = new GoogleGenAI({
-    apiKey: "AIzaSyBI_cJr0V4zsDVVl1ciyMDTNEt79kTQOPo", // add your API key
-  });
+
 
   async function getResponse() {
     setLoading(true);
     setOutputScreen(false);
 
     try {
-      const response = await ai.models.generateContent({
-        model: "gemini-3-flash-preview",
-        contents: `
-You are an experienced programmer with expertise in web development and UI/UX design. You create modern, animated, and fully responsive UI components.
+      const api_key = import.meta.env.VITE_OPENROUTER_API_KEY;
+      const model = import.meta.env.VITE_OPENROUTER_MODEL || "google/gemini-2.0-flash-001";
 
-Now, generate a UI component for: ${prompt}  
-Framework to use: ${framework.value}  
-
+      const res = await fetch("https://openrouter.ai/api/v1/chat/completions", {
+        method: "POST",
+        headers: {
+          "Authorization": `Bearer ${api_key}`,
+          "Content-Type": "application/json",
+          "HTTP-Referer": window.location.origin, // Optional, for OpenRouter rankings
+          "X-Title": "GenUI", // Optional, for OpenRouter rankings
+        },
+        body: JSON.stringify({
+          model: model,
+          messages: [
+            {
+              role: "system",
+              content: `You are an experienced programmer with expertise in web development and UI/UX design. You create modern, animated, and fully responsive UI components.
 Requirements:  
 Return ONLY the code as a single HTML file. Do NOT include Markdown code fences or explanations.
 The code must be clean, well-structured, and easy to understand.  
@@ -57,11 +63,24 @@ Focus on creating a modern, animated, and responsive UI design.
 Include high-quality hover effects, shadows, animations, colors, and typography.  
 Return ONLY the code, formatted properly in Markdown fenced code blocks.  
 Do NOT include explanations, text, comments, or anything else besides the code.  
-And give the whole code in a single HTML file.
-        `,
+And give the whole code in a single HTML file.`
+            },
+            {
+              role: "user",
+              content: `Generate a UI component for: ${prompt}\nFramework to use: ${framework.value}`
+            }
+          ]
+        })
       });
 
-      setCode(response.text);
+      const data = await res.json();
+      const content = data.choices[0].message.content;
+
+      // Extract code if wrapped in markdown blocks
+      const codeMatch = content.match(/```(?:html)?([\s\S]*?)```/i);
+      const extractedCode = codeMatch ? codeMatch[1].trim() : content.trim();
+
+      setCode(extractedCode);
       setOutputScreen(true);
       toast.success("Component generated successfully!");
     } catch (error) {
@@ -209,18 +228,16 @@ focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 focus:
               {/* TAB BAR */}
               <div className="top w-full h-[60px] bg-[#4d4d61] flex items-center justify-center gap-10 rounded-tl-lg rounded-tr-lg mb-4 px-3 z-0">
                 <button
-                  className={`px-6 py-2 rounded-lg cursor-pointer text-white bg-[#3b3b58] hover:bg-[#4d4d70] transition-all duration-300 transform hover:-translate-y-0.5 active:scale-95 focus:outline-none focus:ring-2 focus:ring-indigo-500 ${
-                    tab === 1 ? "bg-[#282862]" : ""
-                  }`}
+                  className={`px-6 py-2 rounded-lg cursor-pointer text-white bg-[#3b3b58] hover:bg-[#4d4d70] transition-all duration-300 transform hover:-translate-y-0.5 active:scale-95 focus:outline-none focus:ring-2 focus:ring-indigo-500 ${tab === 1 ? "bg-[#282862]" : ""
+                    }`}
                   onClick={() => setTab(1)}
                 >
                   Code
                 </button>
 
                 <button
-                  className={`px-6 py-2 rounded-lg cursor-pointer flex items-center gap-2 text-white bg-[#3b3b58] hover:bg-[#4d4d70] transition-all duration-300 transform hover:-translate-y-0.5 active:scale-95 focus:outline-none focus:ring-2 focus:ring-indigo-500 ${
-                    tab === 2 ? "bg-[#282862]" : ""
-                  }`}
+                  className={`px-6 py-2 rounded-lg cursor-pointer flex items-center gap-2 text-white bg-[#3b3b58] hover:bg-[#4d4d70] transition-all duration-300 transform hover:-translate-y-0.5 active:scale-95 focus:outline-none focus:ring-2 focus:ring-indigo-500 ${tab === 2 ? "bg-[#282862]" : ""
+                    }`}
                   onClick={() => setTab(2)}
                 >
                   <BsEye /> Live Preview
